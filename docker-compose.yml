@@ -1,0 +1,39 @@
+services:
+  catalog-service:
+    build: ./catalog-service
+    container_name: catalog-service
+    ports:
+      - "8080:8080"
+  orders-service:
+    build: ./orders-service
+    container_name: orders-service
+    ports:
+      - "7070:7070"
+    depends_on:
+      rabbitmq: { condition: service_healthy }
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq
+    ports: ["5672:5672", "15672:15672"]
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  payments-service:
+    build: ./payments-service
+    container_name: payments-service
+    depends_on:
+      rabbitmq: { condition: service_healthy }
+  shipping-service:
+    build: ./shipping-service
+    container_name: shipping-service
+    depends_on:
+      rabbitmq: { condition: service_healthy }
+  ode:
+    build: ./ode-service
+    container_name: ode
+    ports:
+      - "8888:8080"
+    depends_on:
+      - catalog-service

@@ -1,0 +1,62 @@
+<process name="PlaceOrder"
+         targetNamespace="http://globalbooks.com/bpel"
+         xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+         xmlns:tns="http://globalbooks.com/bpel"
+         xmlns:cat="http://globalbooks.com/catalog"
+         xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+
+    <import location="http://catalog-service:8080/catalog-service/CatalogService?wsdl"
+            namespace="http://globalbooks.com/catalog"
+            importType="http://schemas.xmlsoap.org/wsdl/" />
+    <import location="PlaceOrder.wsdl"
+            namespace="http://globalbooks.com/bpel"
+            importType="http://schemas.xmlsoap.org/wsdl/" />
+
+    <partnerLinks>
+        <partnerLink name="client"
+                     partnerLinkType="tns:PlaceOrderLinkType"
+                     myRole="provider"/>
+        <partnerLink name="catalogService"
+                     partnerLinkType="cat:CatalogLinkType"
+                     partnerRole="provider"/>
+    </partnerLinks>
+
+    <variables>
+        <variable name="input" messageType="tns:PlaceOrderRequestMsg"/>
+        <variable name="output" messageType="tns:PlaceOrderResponseMsg"/>
+        <variable name="catalogReq" messageType="cat:lookupPrice"/>
+        <variable name="catalogRes" messageType="cat:lookupPriceResponse"/>
+    </variables>
+
+    <sequence name="main">
+        <receive name="start" partnerLink="client"
+                 portType="tns:PlaceOrderPortType" operation="placeOrder"
+                 variable="input" createInstance="yes"/>
+
+        <assign name="prepareCatalogRequest">
+            <copy>
+                <from variable="input" part="payload" query="/tns:OrderRequest/isbn"/>
+                <to variable="catalogReq" part="parameters" query="/cat:lookupPrice/arg0"/>
+            </copy>
+        </assign>
+
+        <invoke name="invokeCatalog" partnerLink="catalogService"
+                portType="cat:CatalogEndpoint" operation="lookupPrice"
+                inputVariable="catalogReq" outputVariable="catalogRes"/>
+
+        <assign name="prepareFinalReply">
+            <copy>
+                <from>"order-12345"</from>
+                <to variable="output" part="payload" query="/tns:OrderResponse/orderId"/>
+            </copy>
+            <copy>
+                <from variable="catalogRes" part="parameters" query="/cat:lookupPriceResponse/return/price"/>
+                <to variable="output" part="payload" query="/tns:OrderResponse/price"/>
+            </copy>
+        </assign>
+
+        <reply name="replyOutput" partnerLink="client"
+               portType="tns:PlaceOrderPortType" operation="placeOrder"
+               variable="output"/>
+    </sequence>
+</process>

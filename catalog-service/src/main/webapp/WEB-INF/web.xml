@@ -1,0 +1,18 @@
+<web-app>
+  <display-name>CatalogService</display-name>
+
+  <listener>
+    <listener-class>com.sun.xml.ws.transport.http.servlet.WSServletContextListener</listener-class>
+  </listener>
+
+  <servlet>
+    <servlet-name>CatalogServiceServlet</servlet-name>
+    <servlet-class>com.sun.xml.ws.transport.http.servlet.WSServlet</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>CatalogServiceServlet</servlet-name>
+    <url-pattern>/CatalogService</url-pattern>
+  </servlet-mapping>
+
+</web-app>

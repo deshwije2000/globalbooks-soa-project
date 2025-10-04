@@ -1,0 +1,30 @@
+<businessService serviceKey="uuid:..." businessKey="uuid:...">
+
+    <name xml-lang="en">GlobalBooks Catalog Service</name>
+
+    <description xml-lang="en">
+        Provides book price lookup functionality based on ISBN. 
+        This is a core service for the GlobalBooks e-commerce platform.
+    </description>
+
+    <bindingTemplates>
+        <bindingTemplate bindingKey="uuid:..." serviceKey="uuid:...">
+            <description xml-lang="en">SOAP Binding for the Catalog Service</description>
+
+            <accessPoint useType="endPoint">
+                http://localhost:8080/catalog-service/CatalogService?wsdl
+            </accessPoint>
+
+            <tModelInstanceDetails>
+                <tModelInstanceInfo tModelKey="uuid:c15838d2-1335-4927-9426-78d0b2403b25" />
+            </tModelInstanceDetails>
+        </bindingTemplate>
+    </bindingTemplates>
+
+    <categoryBag>
+        <keyedReference tModelKey="uuid:c15838d2-1335-4927-9426-78d0b2403b25"
+                        keyName="uddi-org:types" 
+                        keyValue="wsdlSpec"/>
+    </categoryBag>
+
+</businessService>
